@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
 
-export default function identifyHandler(prisma: PrismaClient) {
+const identifyHandler = (prisma: PrismaClient) => {
   return async (req: Request, res: Response) => {
     const { email, phoneNumber } = req.body;
 
@@ -9,12 +9,13 @@ export default function identifyHandler(prisma: PrismaClient) {
       return res.status(400).json({ error: 'Email or phoneNumber must be provided' });
     }
 
+    const conditions = [];
+    if (email) conditions.push({ email });
+    if (phoneNumber) conditions.push({ phoneNumber });
+
     const directMatches = await prisma.contact.findMany({
       where: {
-        OR: [
-          email ? { email } : undefined,
-          phoneNumber ? { phoneNumber } : undefined,
-        ].filter(Boolean),
+        OR: conditions,
       },
     });
 
@@ -84,9 +85,12 @@ export default function identifyHandler(prisma: PrismaClient) {
           },
         });
       }
-    }).filter(Boolean);
+      return null;
+    }).filter((op): op is ReturnType<typeof prisma.contact.update> => op !== null);
 
-    await prisma.$transaction(updateOps);
+    if (updateOps.length > 0) {
+      await prisma.$transaction(updateOps);
+    }
 
     const updatedSecondaries = await prisma.contact.findMany({
       where: { linkedId: ultimatePrimary.id },
@@ -106,7 +110,7 @@ export default function identifyHandler(prisma: PrismaClient) {
 
     return res.status(200).json({
       contact: {
-        primaryContatctId: ultimatePrimary.id,
+        primaryContactId: ultimatePrimary.id,
         emails: Array.from(new Set(emailList)),
         phoneNumbers: Array.from(new Set(phoneList)),
         secondaryContactIds: secondaryIds,
@@ -114,3 +118,5 @@ export default function identifyHandler(prisma: PrismaClient) {
     });
   };
 }
+
+export default identifyHandler;
