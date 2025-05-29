@@ -119,7 +119,9 @@ const identifyHandler = (prisma: PrismaClient) => {
         return null;
       })
       .filter(
-        (op): op is ReturnType<typeof prisma.contact.update> => op !== null
+        (
+          op: ReturnType<typeof prisma.contact.update> | null
+        ): op is ReturnType<typeof prisma.contact.update> => op !== null
       );
 
     // Execute any necessary updates as a single transaction
