@@ -113,6 +113,4 @@ model Contact {
 }
 ```
 
-## License
-MIT
 
