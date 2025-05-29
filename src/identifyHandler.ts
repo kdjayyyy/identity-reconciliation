@@ -1,5 +1,17 @@
-import { PrismaClient, Contact } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+
+// Define Contact type based on Prisma schema
+type Contact = {
+  id: number;
+  phoneNumber: string | null;
+  email: string | null;
+  linkedId: number | null;
+  linkPrecedence: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+};
 
 const identifyHandler = (prisma: PrismaClient) => {
   return async (req: Request, res: Response) => {
