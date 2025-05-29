@@ -6,6 +6,7 @@
       "src": "/identify",
       "dest": "/api/identify.ts",
       "methods": ["GET", "POST", "OPTIONS"],
+      "continue": true,
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -16,11 +17,19 @@
       "src": "/contacts",
       "dest": "/api/contacts.ts",
       "methods": ["GET", "OPTIONS"],
+      "continue": true,
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization"
       }
     }
-  ]
+  ],
+  "public": true,
+  "functions": {
+    "api/**/*": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 }
