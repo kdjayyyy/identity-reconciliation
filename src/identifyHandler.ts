@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Contact } from "@prisma/client";
 import { Request, Response } from "express";
 
 const identifyHandler = (prisma: PrismaClient) => {
@@ -43,12 +43,10 @@ const identifyHandler = (prisma: PrismaClient) => {
           secondaryContactIds: [],
         },
       });
-    }
-
-    // Determine unique set of primary contact IDs from directMatches
+    } // Determine unique set of primary contact IDs from directMatches
     const involvedPrimaryIds = Array.from(
       new Set(
-        directMatches.map((c) =>
+        directMatches.map((c: Contact) =>
           c.linkPrecedence === "primary" ? c.id : c.linkedId!
         )
       )
@@ -62,22 +60,19 @@ const identifyHandler = (prisma: PrismaClient) => {
           { linkedId: { in: involvedPrimaryIds } },
         ],
       },
-    });
-
-    // Find the oldest primary contact to serve as the ultimate primary
+    }); // Find the oldest primary contact to serve as the ultimate primary
     const primaryContacts = candidatePool.filter(
-      (c) => c.linkPrecedence === "primary"
+      (c: Contact) => c.linkPrecedence === "primary"
     );
-    const ultimatePrimary = primaryContacts.reduce((oldest, curr) =>
-      new Date(curr.createdAt) < new Date(oldest.createdAt) ? curr : oldest
-    );
-
-    // Collect existing emails and phoneNumbers in the pool for deduplication
+    const ultimatePrimary = primaryContacts.reduce(
+      (oldest: Contact, curr: Contact) =>
+        new Date(curr.createdAt) < new Date(oldest.createdAt) ? curr : oldest
+    ); // Collect existing emails and phoneNumbers in the pool for deduplication
     const existingEmails = new Set(
-      candidatePool.map((c) => c.email).filter(Boolean)
+      candidatePool.map((c: Contact) => c.email).filter(Boolean)
     );
     const existingPhones = new Set(
-      candidatePool.map((c) => c.phoneNumber).filter(Boolean)
+      candidatePool.map((c: Contact) => c.phoneNumber).filter(Boolean)
     );
 
     // If provided identifier is new, create a secondary record linked to ultimate primary
@@ -93,11 +88,9 @@ const identifyHandler = (prisma: PrismaClient) => {
           linkPrecedence: "secondary",
         },
       });
-    }
-
-    // Ensure all contacts other than ultimate primary are marked as secondary correctly
+    } // Ensure all contacts other than ultimate primary are marked as secondary correctly
     const updateOps = candidatePool
-      .map((c) => {
+      .map((c: Contact) => {
         if (
           c.id !== ultimatePrimary.id &&
           (c.linkPrecedence !== "secondary" ||
@@ -125,20 +118,18 @@ const identifyHandler = (prisma: PrismaClient) => {
     // Fetch updated secondary contacts for response
     const updatedSecondaries = await prisma.contact.findMany({
       where: { linkedId: ultimatePrimary.id },
-    });
-
-    // Build unique lists of emails and phoneNumbers for the response
+    }); // Build unique lists of emails and phoneNumbers for the response
     const emailList = [
       ultimatePrimary.email,
-      ...updatedSecondaries.map((c) => c.email),
+      ...updatedSecondaries.map((c: Contact) => c.email),
     ].filter(Boolean);
 
     const phoneList = [
       ultimatePrimary.phoneNumber,
-      ...updatedSecondaries.map((c) => c.phoneNumber),
+      ...updatedSecondaries.map((c: Contact) => c.phoneNumber),
     ].filter(Boolean);
 
-    const secondaryIds = updatedSecondaries.map((c) => c.id);
+    const secondaryIds = updatedSecondaries.map((c: Contact) => c.id);
 
     // Return consolidated contact information
     return res.status(200).json({
