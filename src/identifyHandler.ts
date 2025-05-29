@@ -58,13 +58,13 @@ const identifyHandler = (prisma: PrismaClient) => {
       new Date(curr.createdAt) < new Date(oldest.createdAt) ? curr : oldest
     );
 
-    const E_group = new Set(candidatePool.map(c => c.email).filter(Boolean));
-    const P_group = new Set(candidatePool.map(c => c.phoneNumber).filter(Boolean));
+    // rename for clarity
+    const existingEmails = new Set(candidatePool.map(c => c.email).filter(Boolean));
+    const existingPhones = new Set(candidatePool.map(c => c.phoneNumber).filter(Boolean));
 
-    let newSecondary: any = null;
-
-    if ((email && !E_group.has(email)) || (phoneNumber && !P_group.has(phoneNumber))) {
-      newSecondary = await prisma.contact.create({
+    // create new secondary if incoming info is new
+    if ((email && !existingEmails.has(email)) || (phoneNumber && !existingPhones.has(phoneNumber))) {
+      await prisma.contact.create({
         data: {
           email,
           phoneNumber,
