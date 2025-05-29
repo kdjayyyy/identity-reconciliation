@@ -10,12 +10,9 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // Handle OPTIONS request for CORS preflight
+  // Handle OPTIONS requests for CORS preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    return res.status(200).end();
+    return res.status(200).end()
   }
   
   if (req.method !== 'POST') {
