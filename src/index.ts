@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from 'express';
-import identifyRouter from './controllers/identifyController';
 import { getContacts } from './controllers/contactController';
 import identifyController from './controllers/identifyController';
 
